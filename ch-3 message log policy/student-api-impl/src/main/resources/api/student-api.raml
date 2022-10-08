@@ -1,0 +1,30 @@
+#%RAML 1.0
+title: student-api
+
+/students:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              [
+                {
+                    "id": "1",
+                    "name" : "Anand"
+                },
+                {
+                    "id": "2",
+                    "name": "Krishna"
+                }
+              ]
+
+  post:
+    body:
+      application/json:
+        example:
+          {
+            "name": "Srinu"
+
+          }
+                                            

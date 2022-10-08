@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="601a2dec-8822-4fbf-889b-0f475742c045" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="0ffecf58-2752-40a9-b3e2-f68f4502dc21" file="props.yaml" />
+	<flow name="catelogFlow" doc:id="a6ed4624-eba8-4215-a5ce-ceb36e4ea9c1" >
+		<http:listener doc:name="Listener" doc:id="5b3bf9ac-56ef-43a4-bf85-ec99d2e6eea6" config-ref="HTTP_Listener_config" path="/cat"/>
+		<logger level="INFO" doc:name="Logger" doc:id="932de2f2-5483-4d38-b4ea-ca59274b3db3" message='#["the date time of this log statement is "++ now()]' category="audit"/>
+		<logger level="ERROR" doc:name="Logger" doc:id="17ca8955-e835-49dd-bc07-14e520482a45" message="this is not a audit  log"/>
+		<set-payload value='#["This is output of Catelog"]' doc:name="Set Payload" doc:id="9b0a1963-ae4a-463e-a598-dadff8a09542" />
+	</flow>
+</mule>

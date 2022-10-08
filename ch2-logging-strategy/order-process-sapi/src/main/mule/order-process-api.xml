@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	
+	<flow name="order-process-apiFlow" doc:id="8fea0d4c-b004-4bc4-9d1b-3562be3e8208" >
+	  <vm:listener queueName="ordersQueue" doc:name="Listener" doc:id="b23e98d8-1a8f-4821-b408-62bb3e62b096" config-ref="VM_Config"/>
+		<logger level="DEBUG" doc:name="order recived logger" doc:id="056b5b8c-e47e-4137-a911-3047baf1c986" message="Order In System API for the customer #[correlationId]"/>
+		<ee:transform doc:name="Transform Message" doc:id="addaa310-92b4-45cd-82a4-b863e3a32458" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	customerId: payload.customerId,
+	orderCategory: payload.orderCategory,
+	itemName: payload.itemName,
+	status: payload.status,
+	quantity: payload.quantity
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="before Insert logger" doc:id="ebd3cbfa-d470-43a0-909c-2d6dba039331" message="Inserting the record to Database, for customer : #[correlationId].... and the payload is #[payload]"/>
+		<db:insert doc:name="Insert" doc:id="a9bdfcb0-bc8f-493f-8370-5a5e1e574904" config-ref="Database_Config" target="insertStatus">
+			<db:sql ><![CDATA[insert into oders(customerId,orderCategory,itemName,status,quantity) values(:customerId,:orderCategory,:itemName,:status,:quantity)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	customerId: payload.customerId,
+	orderCategory: payload.orderCategory,
+	itemName: payload.itemName,
+	status: payload.status,
+	quantity: payload.quantity
+}]]]></db:input-parameters>
+		</db:insert>
+		<logger level="DEBUG" doc:name="After Insert logger" doc:id="07b2dcff-6af7-4578-809a-95cbf27d4afd" message="Successfully Inserted  the record to Database, for customer : #[correlationId].... "/>
+		<db:select doc:name="Select" doc:id="7f67fa30-bb4d-401e-8d10-480d82596301" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from oders]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="ac45d06f-1e3c-4fd8-b576-9207853a99e5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

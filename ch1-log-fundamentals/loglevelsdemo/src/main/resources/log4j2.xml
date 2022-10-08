@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-5p %d [%t] [event: %X{correlationId}] %c: %m%n" />
+        </Console>
+        <Console name="ConsoleLogUtil" target="SYSTEM_OUT">
+            <PatternLayout pattern="%m%n" />
+        </Console>
+        <Http name="Splunk" url="http://localhost:8088/services/collector/raw">
+            <Property name="Authorization" value="Splunk c109402d-c3dd-4524-b1a9-315404144170"></Property>
+            <PatternLayout pattern="%-5p %d [%t] [event: %X{correlationId}] %c: %m%n"></PatternLayout>
+        </Http>
+          <RollingFile name="file" fileName="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}loglevelsdemo.log"
+                 filePattern="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}catelog-%i.log">
+            <PatternLayout pattern="%-5p %d [%t] [processor: %X{processorPath}; event: %X{correlationId}] %c: %m%n"/>
+            <SizeBasedTriggeringPolicy size="10 MB"/>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <AsyncLogger
+            name="org.mule.runtime.core.internal.processor.LoggerMessageProcessor"
+            level="INFO" />
+        <AsyncLogger name="com.mulesoft.agent" level="INFO" />
+        <AsyncLogger name="org.mule.runtime.core.internal.logging"
+            additivity="false" level="INFO">
+            <AppenderRef ref="ConsoleLogUtil" />
+        </AsyncLogger>
+        <AsyncRoot level="INFO">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="Splunk" />
+            <AppenderRef ref="file" />
+        </AsyncRoot>
+        <AsyncLogger name="com.mulesoft.mule.runtime.gw" level="INFO" />
+        <AsyncLogger name="com.mulesoft.extension.policies" level="INFO" />
+        <AsyncLogger name="com.mulesoft.extension.gateway" level="INFO" />
+        <AsyncLogger name="com.mulesoft.analytics" level="INFO" />
+        <AsyncLogger name="org.mule" level="INFO" />
+        <AsyncLogger name="com.mulesoft" level="INFO" />
+    </Loggers>
+</Configuration>
+
+

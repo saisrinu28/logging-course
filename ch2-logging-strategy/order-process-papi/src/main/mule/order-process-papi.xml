@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	
+	<flow name="order-process-papiFlow" doc:id="1e58f3ed-4872-4c4c-8f20-1959294727f6" >
+		<http:listener doc:name="Listener" doc:id="9375b200-c141-44ef-bece-7abb7547f1f5" config-ref="HTTP_Listener_config" path="/prc">
+			<http:response statusCode="202" />
+		</http:listener>
+		<logger level="DEBUG" doc:name="Order Recieved Logger" doc:id="f2106d8a-a555-42cc-9af7-f83602ee47e6" message="Order Recieved from cusotmer ::  #[correlationId]  and payload received is :: #[payload]"/>
+		<logger level="DEBUG" doc:name="Before Inserting to SAPI Logger" doc:id="d425e713-2353-4436-a7c0-2f311b0f3e08" message='Invoking system API  for customer id :- #[correlationId] '/>
+		<vm:publish doc:name="Publish" doc:id="8401b0a1-eba0-4741-b370-99a1be4eaaaa" config-ref="VM_Config" sendCorrelationId="AUTO" queueName="ordersQueue"/>
+		<ee:transform doc:name="Transform Message" doc:id="4cc2954e-f785-4219-92f7-06babf4e2bd6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	response: "order successfully received for customer "++ payload.customerId
+	 
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="http.status" ><![CDATA[202]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+</mule>
